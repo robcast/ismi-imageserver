@@ -32,6 +32,7 @@ services:
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./proxy/vhost.d/:/etc/nginx/vhost.d:ro
+      - ./proxy/conf.d/token_cache.conf:/etc/nginx/conf.d/token_cache.conf:ro
       - ./proxy/certs/:/etc/nginx/certs/:ro
       - proxy-html:/usr/share/nginx/html/:ro
       - manifests:/var/www/iiif/manifests/:ro
