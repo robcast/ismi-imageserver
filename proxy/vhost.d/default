@@ -1,3 +1,13 @@
+## Start of configuration add by letsencrypt container
+location ^~ /.well-known/acme-challenge/ {
+    auth_basic off;
+    auth_request off;
+    allow all;
+    root /usr/share/nginx/html;
+    try_files $uri =404;
+    break;
+}
+## End of configuration add by letsencrypt container
 # add CORS header to all responses
 add_header Access-Control-Allow-Origin "*";
 
@@ -22,13 +32,13 @@ location /iiif/manifests/ {
 location @manifest_401 {
     add_header Access-Control-Allow-Origin "*" always;
     root /var/www/;
-    try_files /iiif/manifests/default-auth-manifest.json =403;
+    try_files /iiif/default-manifests/default-auth-manifest.json =403;
 }
 
 location @image_401 {
     add_header Access-Control-Allow-Origin "*" always;
     root /var/www/;
-    try_files /iiif/manifests/default-auth-image.json =403;
+    try_files /iiif/default-manifests/default-auth-image.json =403;
 }
 
 # serve manifests with index for database update
