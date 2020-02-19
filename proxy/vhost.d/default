@@ -9,9 +9,9 @@ location /iiif/manifests/ {
 
     # CORS for Preflighted requests
     if ($request_method = OPTIONS ) {
-      add_header "Access-Control-Allow-Origin"  "*";
-      add_header "Access-Control-Allow-Headers" "Authorization";
-      return 200;
+        add_header "Access-Control-Allow-Origin"  "*";
+        add_header "Access-Control-Allow-Headers" "Authorization";
+        return 200;
     }
     
     # authenticate manifest requests
@@ -43,37 +43,37 @@ location /iiif/manifests-internal/ {
 
 # auth service endpoint for proxy auth_request
 location = /auth/query_auth {
-  internal;
-  include uwsgi_params;
-  uwsgi_pass auth:5000;
-  uwsgi_pass_request_body off;
-  # headers in uwsgi_param should be all uppercase!
-  uwsgi_param HTTP_ORIGINAL_URI $request_uri;
-  # cache responses by session cookie for 60s
-  uwsgi_cache token_cache;
-  uwsgi_cache_key $cookie_session;
-  uwsgi_cache_valid 200 60s;
-  uwsgi_ignore_headers Cache-Control Expires;
-  uwsgi_cache_lock on;
+    internal;
+    include uwsgi_params;
+    uwsgi_pass auth:5000;
+    uwsgi_pass_request_body off;
+    # headers in uwsgi_param should be all uppercase!
+    uwsgi_param HTTP_ORIGINAL_URI $request_uri;
+    # cache responses by session cookie for 60s
+    uwsgi_cache token_cache;
+    uwsgi_cache_key $cookie_session;
+    uwsgi_cache_valid 200 60s;
+    uwsgi_ignore_headers Cache-Control Expires;
+    uwsgi_cache_lock on;
 }
 
 # other auth service pages (without auth request barrier)
 location /auth {
-  auth_request off;
-  include uwsgi_params;
-  uwsgi_pass auth:5000;
-  uwsgi_pass_request_body on;
-  # headers in uwsgi_param should be all uppercase!
-  uwsgi_param HTTP_ORIGINAL_URI $request_uri;
+    auth_request off;
+    include uwsgi_params;
+    uwsgi_pass auth:5000;
+    uwsgi_pass_request_body on;
+    # headers in uwsgi_param should be all uppercase!
+    uwsgi_param HTTP_ORIGINAL_URI $request_uri;
 }
 
 # no auth for letsencrypt certbot
 location /.well-known {
-  auth_request off;
+    auth_request off;
 }
 
 # no auth for favicon requests
 location = /favicon.ico {
-  auth_request off;
-  try_files $uri =404;
+    auth_request off;
+    try_files $uri =404;
 }

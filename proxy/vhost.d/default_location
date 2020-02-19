@@ -1,8 +1,8 @@
 # CORS for Preflighted requests (for info.json)
 if ($request_method = OPTIONS ) {
-   add_header "Access-Control-Allow-Origin"  "*";
-   add_header "Access-Control-Allow-Headers" "Authorization";
-   return 200;
+    add_header "Access-Control-Allow-Origin"  "*";
+    add_header "Access-Control-Allow-Headers" "Authorization";
+    return 200;
 }
 
 # Use ngx_http_auth_request_module to auth the user, sending the
