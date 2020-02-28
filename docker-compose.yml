@@ -13,6 +13,11 @@ services:
       - LETSENCRYPT_HOST=${VIRTUAL_HOST:?err}
     volumes:
       - images:/var/www/images/:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   auth:
     build: ./auth
@@ -23,6 +28,11 @@ services:
       - DB_CONNECTION=${AUTH_DB_CONNECTION:?err}
       - ADMIN_USERID=${AUTH_ADMIN_USERID:?err}
       - ADMIN_PASSWORD=${AUTH_ADMIN_PASSWORD:?err}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   proxy:
     image: jwilder/nginx-proxy:alpine
@@ -39,6 +49,11 @@ services:
       - manifests:/var/www/iiif/manifests/:ro
     labels:
       com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   certbot:
     image: jrcs/letsencrypt-nginx-proxy-companion
@@ -52,6 +67,11 @@ services:
       - ./proxy/vhost.d/:/etc/nginx/vhost.d/
       - ./proxy/certs/:/etc/nginx/certs/
       - proxy-html:/usr/share/nginx/html/
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   images:
