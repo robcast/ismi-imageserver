@@ -24,8 +24,8 @@ app.config['DEBUG'] = True
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 app.config['SECURITY_PASSWORD_SALT'] = os.environ['SECURITY_PASSWORD_SALT']
 #app.config['SECURITY_URL_PREFIX'] = "/auth"
-app.config['SECURITY_POST_LOGIN_VIEW'] = "/auth/"
-app.config['SECURITY_POST_LOGOUT_VIEW'] = "/auth/"
+app.config['SECURITY_POST_LOGIN_VIEW'] = "/iiif/auth/"
+app.config['SECURITY_POST_LOGOUT_VIEW'] = "/iiif/auth/"
 app.config['SECURITY_TRACKABLE'] = False
 
 # Initialize Flask-Security
@@ -34,8 +34,8 @@ security = Security(app, user_datastore)
 
 # Initialize Flask-Admin
 admin = Admin(app, name='ISMI image server authentication', template_mode='bootstrap3')
-# set brand link url for main template
-#admin.index_view.admin.url = '/auth/admin'
+# set brand link url for main template (doesn't work)
+#admin.index_view.admin.url = '/iiif/auth/'
 
 # Add Flask-Admin views for Users and Roles
 admin.add_view(UserAdmin(User, db_session))

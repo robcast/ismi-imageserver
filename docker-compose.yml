@@ -3,7 +3,7 @@ version: '3'
 services:
   iipsrv:
     build: ./iipimage
-    restart: always
+    restart: unless-stopped
     environment:
       - URI_MAP=iiif/images=>IIIF
       - FILESYSTEM_PREFIX=/var/www/images/
@@ -13,6 +13,8 @@ services:
       - LETSENCRYPT_HOST=${VIRTUAL_HOST:?err}
     volumes:
       - images:/var/www/images/:ro
+    networks:
+      - internal
     logging:
       driver: json-file
       options:
@@ -21,52 +23,41 @@ services:
 
   auth:
     build: ./auth
-    restart: always
+    restart: unless-stopped
     environment:
       - SECRET_KEY=${AUTH_SECRET_KEY:?err}
       - SECURITY_PASSWORD_SALT=${AUTH_PASSWORD_SALT:?err}
       - DB_CONNECTION=${AUTH_DB_CONNECTION:?err}
       - ADMIN_USERID=${AUTH_ADMIN_USERID:?err}
       - ADMIN_PASSWORD=${AUTH_ADMIN_PASSWORD:?err}
+    networks:
+      - internal
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
 
-  proxy:
+  nginx:
     image: jwilder/nginx-proxy:alpine
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
+    restart: unless-stopped
+    labels:
+      # use traefik proxy
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-net"
+      # create router for our host
+      - "traefik.http.routers.imageserver.rule=Host(`${VIRTUAL_HOST:?err}`) && PathPrefix(`/iiif`)"
+      # use TLS
+      - "traefik.http.routers.imageserver.entrypoints=https"
+      - "traefik.http.routers.imageserver.tls=true"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./proxy/vhost.d/:/etc/nginx/vhost.d:ro
       - ./proxy/conf.d/token_cache.conf:/etc/nginx/conf.d/token_cache.conf:ro
-      - ./proxy/certs/:/etc/nginx/certs/:ro
-      - proxy-html:/usr/share/nginx/html/:ro
       - manifests:/var/www/iiif/manifests/:ro
-    labels:
-      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  certbot:
-    image: jrcs/letsencrypt-nginx-proxy-companion
-    restart: always
-    environment:
-      - DEFAULT_EMAIL=${LETSENCRYPT_EMAIL:?err}
-      # proxy should be discovered by label but sometimes it doesn't
-      #- NGINX_PROXY_CONTAINER=renamer_proxy_1
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./proxy/vhost.d/:/etc/nginx/vhost.d/
-      - ./proxy/certs/:/etc/nginx/certs/
-      - proxy-html:/usr/share/nginx/html/
+    networks:
+      - internal
+      - proxy-net
     logging:
       driver: json-file
       options:
@@ -86,4 +77,9 @@ volumes:
       type: none
       device: "${MANIFEST_DIR:?err}"
       o: bind
-  proxy-html:
+
+networks:
+  internal:
+  proxy-net:
+    name: proxy-net
+    external: true

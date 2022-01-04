@@ -1,13 +1,3 @@
-## Start of configuration add by letsencrypt container
-location ^~ /.well-known/acme-challenge/ {
-    auth_basic off;
-    auth_request off;
-    allow all;
-    root /usr/share/nginx/html;
-    try_files $uri =404;
-    break;
-}
-## End of configuration add by letsencrypt container
 # add CORS header to all responses
 add_header Access-Control-Allow-Origin "*";
 
@@ -25,7 +15,7 @@ location /iiif/manifests/ {
     }
     
     # authenticate manifest requests
-    auth_request /auth/query_auth;
+    auth_request /iiif/auth/query_auth;
     error_page 401 @manifest_401;
 }
 
@@ -52,7 +42,7 @@ location /iiif/manifests-internal/ {
 }
 
 # auth service endpoint for proxy auth_request
-location = /auth/query_auth {
+location = /iiif/auth/query_auth {
     internal;
     include uwsgi_params;
     uwsgi_pass auth:5000;
@@ -68,7 +58,7 @@ location = /auth/query_auth {
 }
 
 # other auth service pages (without auth request barrier)
-location /auth {
+location /iiif/auth {
     auth_request off;
     include uwsgi_params;
     uwsgi_pass auth:5000;
