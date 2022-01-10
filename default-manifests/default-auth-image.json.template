@@ -1,0 +1,32 @@
+{
+    "@context": "http://iiif.io/api/image/2/context.json",
+    "@id": "https://ismi.medeniyet.edu.tr/iiif/images/auth-image.jpg",
+    "protocol": "http://iiif.io/api/image",
+    "width": 1234,
+    "height": 1234,
+    "profile": [
+        "http://iiif.io/api/image/2/level1.json"
+    ],
+    "service": {
+        "@context": "http://iiif.io/api/auth/1/context.json",
+        "@id": "https://ismi.medeniyet.edu.tr/iiif/auth/iiif-login",
+        "profile": "http://iiif.io/api/auth/1/login",
+        "label": "Login to image server",
+        "header": "Please Log In",
+        "description": "Log in to the image authentication server to view this content.",
+        "confirmLabel": "Login",
+        "failureHeader": "Authentication Failed",
+        "failureDescription": "The log in attempt failed.",
+        "service": [
+            {
+                "@id": "https://ismi.medeniyet.edu.tr/iiif/auth/iiif-token",
+                "profile": "http://iiif.io/api/auth/1/token"
+            },
+            {
+                "@id": "https://ismi.medeniyet.edu.tr/iiif/auth/logout",
+                "profile": "http://iiif.io/api/auth/1/logout",
+                "label": "Log out from image server"
+            }
+        ]
+    }
+}

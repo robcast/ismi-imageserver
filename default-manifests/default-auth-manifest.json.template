@@ -1,0 +1,42 @@
+{
+	"@context": "http://iiif.io/api/presentation/2/context.json",
+	"@id": "https://ismi.medeniyet.edu.tr/iiif/manifests/default-auth-manifest",
+	"@type": "sc:Manifest",
+	"label": "[Default manifest for authentication]",
+	"sequences": [
+        {
+            "@id": "https://ismi.medeniyet.edu.tr/iiif/manifests/default-auth-manifest/sequence/default",
+            "@type": "sc:Sequence",
+            "label": "Default sequence",
+            "canvases": [
+                {
+                    "@id": "https://ismi.medeniyet.edu.tr/iiif/manifests/default-auth-manifest/canvas/1",
+                    "@type": "sc:Canvas",
+                    "label": "Scan 1",
+                    "width": 1234,
+                    "height": 1234,
+                    "images": [
+                        {
+                            "@id": "https://ismi.medeniyet.edu.tr/iiif/manifests/default-auth-manifest/annotation/image-1",
+                            "@type": "oa:Annotation",
+                            "motivation": "sc:painting",
+                            "on": "https://ismi.medeniyet.edu.tr/iiif/manifests/default-auth-manifest/canvas/1",
+                            "resource": {
+                                "@id": "https://ismi.medeniyet.edu.tr/iiif/images/default-auth-image.jpg",
+                                "@type": "dctypes:Image",
+                                "format": "image/jpeg",
+                                "height": 1234,
+                                "width": 1234,
+                                "service": {
+                                    "@context": "http://iiif.io/api/image/2/context.json",
+                                    "@id": "https://ismi.medeniyet.edu.tr/iiif/images/default-auth-image.jpg",
+                                    "profile": "http://iiif.io/api/image/2/level1.json"
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
