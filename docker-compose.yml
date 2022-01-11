@@ -8,9 +8,6 @@ services:
       - URI_MAP=iiif/images=>IIIF
       - FILESYSTEM_PREFIX=/var/www/images/
       - JPEG_QUALITY=${JPEG_QUALITY:-90}
-      - VIRTUAL_PROTO=fastcgi
-      - VIRTUAL_HOST=${VIRTUAL_HOST:?err}
-      - LETSENCRYPT_HOST=${VIRTUAL_HOST:?err}
     volumes:
       - images:/var/www/images/:ro
     networks:
@@ -39,8 +36,10 @@ services:
         max-file: "3"
 
   nginx:
-    image: jwilder/nginx-proxy:alpine
+    image: nginx:stable-alpine
     restart: unless-stopped
+    environment:
+      - VIRTUAL_HOST=${VIRTUAL_HOST:?err}
     labels:
       # use traefik proxy
       - "traefik.enable=true"
@@ -51,10 +50,9 @@ services:
       - "traefik.http.routers.imageserver.entrypoints=https"
       - "traefik.http.routers.imageserver.tls=true"
     volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./proxy/vhost.d/:/etc/nginx/vhost.d:ro
-      - ./proxy/conf.d/token_cache.conf:/etc/nginx/conf.d/token_cache.conf:ro
+      - ./proxy/nginx/templates/:/etc/nginx/templates/:ro
       - manifests:/var/www/iiif/manifests/:ro
+      - ./default-manifests:/var/www/iiif/default-manifests:ro
     networks:
       - internal
       - proxy-net

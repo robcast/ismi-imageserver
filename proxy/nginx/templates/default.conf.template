@@ -1,0 +1,116 @@
+server {
+    listen       80;
+    listen  [::]:80;
+    
+    server_name  ${VIRTUAL_HOST};
+
+    #access_log  /var/log/nginx/host.access.log  main;    
+
+    # add CORS header to all responses
+    add_header Access-Control-Allow-Origin "*";
+
+    # image server
+    location /iiif/images/ {
+        # CORS for Preflighted requests (for info.json)
+        if ($request_method = OPTIONS ) {
+            add_header "Access-Control-Allow-Origin"  "*";
+            add_header "Access-Control-Allow-Headers" "Authorization";
+            return 200;
+        }
+
+        # Use ngx_http_auth_request_module to auth the user, sending the
+        # request to the /auth/query_auth URI which will return an http
+        # error code of 200 if approved or 401 if denied.
+        auth_request /iiif/auth/query_auth;
+        
+        # use custom error handling for auth errors
+        error_page 401 @image_401;
+
+        # pass to iipsrv container as fastcgi
+        fastcgi_pass    iipsrv:9000;
+        
+        fastcgi_param   PATH_INFO $fastcgi_script_name;
+        fastcgi_param   REQUEST_METHOD $request_method;
+        fastcgi_param   QUERY_STRING $query_string;
+        fastcgi_param   CONTENT_TYPE $content_type;
+        fastcgi_param   CONTENT_LENGTH $content_length;
+        fastcgi_param   SERVER_PROTOCOL $server_protocol;
+        fastcgi_param   REQUEST_URI $request_uri;
+        fastcgi_param   HTTPS $https if_not_empty;
+    }
+    
+    # serve manifests
+    location /iiif/manifests/ {
+        root /var/www/;
+    
+        # CORS for Preflighted requests
+        if ($request_method = OPTIONS ) {
+            add_header "Access-Control-Allow-Origin"  "*";
+            add_header "Access-Control-Allow-Headers" "Authorization";
+            return 200;
+        }
+        
+        # authenticate manifest requests
+        auth_request /iiif/auth/query_auth;
+        error_page 401 @manifest_401;
+    }
+    
+    location @manifest_401 {
+        add_header Access-Control-Allow-Origin "*" always;
+        root /var/www/;
+        try_files /iiif/default-manifests/default-auth-manifest.json =403;
+    }
+    
+    location @image_401 {
+        add_header Access-Control-Allow-Origin "*" always;
+        root /var/www/;
+        try_files /iiif/default-manifests/default-auth-image.json =403;
+    }
+    
+    # serve manifests with index for database update
+    location /iiif/manifests-internal/ {
+        alias /var/www/iiif/manifests/;
+        autoindex on;
+        autoindex_format json;
+        allow 141.14.214.184; #ismi-db.mpiwg-berlin.mpg.de
+        allow 141.14.0.0/16; #mpiwg-berlin.mpg.de
+        deny  all;    
+    }
+    
+    # auth service endpoint for proxy auth_request
+    location = /iiif/auth/query_auth {
+        internal;
+        include uwsgi_params;
+        uwsgi_pass auth:5000;
+        uwsgi_pass_request_body off;
+        # headers in uwsgi_param should be all uppercase!
+        uwsgi_param HTTP_ORIGINAL_URI $request_uri;
+        # cache responses by session cookie for 60s
+        uwsgi_cache token_cache;
+        uwsgi_cache_key $cookie_session;
+        uwsgi_cache_valid 200 60s;
+        uwsgi_ignore_headers Cache-Control Expires;
+        uwsgi_cache_lock on;
+    }
+    
+    # other auth service pages (without auth request barrier)
+    location /iiif/auth {
+        auth_request off;
+        include uwsgi_params;
+        uwsgi_pass auth:5000;
+        uwsgi_pass_request_body on;
+        # headers in uwsgi_param should be all uppercase!
+        uwsgi_param HTTP_ORIGINAL_URI $request_uri;
+    }
+    
+    # no auth for favicon requests
+    location = /iiif/favicon.ico {
+        auth_request off;
+        try_files $uri =404;
+    }
+    
+}
+
+# This is where auth_request responses will be stored if proxy_cache is enabled
+uwsgi_cache_path /var/cache/nginx/tokens levels=1 keys_zone=token_cache:1m max_size=10m;
+    

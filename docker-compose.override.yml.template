@@ -1,33 +1,7 @@
 version: '3'
 
-## uncomment to run Nginx with letsencrypt certificates without traefik
-#services:
-#  nginx:
-#    ports:
-#      - "80:80"
-#      - "443:443"
-#    volumes:
-#      - ./proxy/certs/:/etc/nginx/certs/:ro
-#      - proxy-html:/usr/share/nginx/html/:ro
-#    labels:
-#      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
-#  certbot:
-#    image: jrcs/letsencrypt-nginx-proxy-companion
-#    restart: always
-#    environment:
-#      - DEFAULT_EMAIL=${LETSENCRYPT_EMAIL:?err}
-#      # proxy should be discovered by label but sometimes it doesn't
-#      #- NGINX_PROXY_CONTAINER=renamer_proxy_1
-#    volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock:ro
-#      - ./proxy/vhost.d/:/etc/nginx/vhost.d/
-#      - ./proxy/certs/:/etc/nginx/certs/
-#      - proxy-html:/usr/share/nginx/html/
-#    logging:
-#      driver: json-file
-#      options:
-#        max-size: "10m"
-#        max-file: "3"
-#
-#volumes:
-#  proxy-html:
+services:
+  nginx:
+    ports:
+      # development access to nginx
+      - 8000:80
