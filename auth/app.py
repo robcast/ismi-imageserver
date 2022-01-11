@@ -27,6 +27,9 @@ app.config['SECURITY_PASSWORD_SALT'] = os.environ['SECURITY_PASSWORD_SALT']
 app.config['SECURITY_POST_LOGIN_VIEW'] = "/iiif/auth/"
 app.config['SECURITY_POST_LOGOUT_VIEW'] = "/iiif/auth/"
 app.config['SECURITY_TRACKABLE'] = False
+# cookie settings for IIIF-Auth
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+app.config['SESSION_COOKIE_SECURE'] = True
 
 # Initialize Flask-Security
 user_datastore = SQLAlchemySessionUserDatastore(db_session, User, Role)
